@@ -1,5 +1,9 @@
 # Eloquent STI (Single Table Inheritance)
 
+[![Build
+Status](https://travis-ci.org/Jaspaul/eloquent-sti.svg?branch=master)](https://travis-ci.org/Jaspaul/eloquent-sti) [![Coverage
+Status](https://coveralls.io/repos/github/Jaspaul/eloquent-sti/badge.svg?branch=master)](https://coveralls.io/github/Jaspaul/eloquent-sti?branch=master) [![Code Climate](https://codeclimate.com/github/Jaspaul/eloquent-sti/badges/gpa.svg)](https://codeclimate.com/github/Jaspaul/eloquent-sti)
+
 ## Install
 
 Via Composer
