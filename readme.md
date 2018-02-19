@@ -16,7 +16,6 @@ $ composer require jaspaul/eloquent-sti
 
 The following versions of PHP are supported by this version.
 
-* PHP 7.0
 * PHP 7.1
 * PHP 7.2
 
