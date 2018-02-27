@@ -5,7 +5,7 @@ namespace Tests;
 use Tests\Helpers\Vehicle;
 use Tests\Helpers\Car;
 use Tests\Helpers\Plane;
-use Jaspaul\EloquentSTI\Exceptions\TypeMissingException;
+use Jaspaul\EloquentSTI\Exceptions\UndefinedTypeException;
 
 class StrictTypesTest extends TestCase
 {
@@ -28,7 +28,7 @@ class StrictTypesTest extends TestCase
      */
     public function it_throws_an_exception_before_saving_if_the_class_is_not_in_the_types_array()
     {
-        $this->expectException(TypeMissingException::class);
+        $this->expectException(UndefinedTypeException::class);
         $plane = new Plane(['name' => '747']);
         $plane->save();
         $this->assertEmpty(Vehicle::all());

@@ -2,7 +2,7 @@
 
 namespace Jaspaul\EloquentSTI;
 
-use Jaspaul\EloquentSTI\Exceptions\TypeMissingException;
+use Jaspaul\EloquentSTI\Exceptions\UndefinedTypeException;
 
 trait StrictTypes
 {
@@ -32,7 +32,7 @@ trait StrictTypes
         $flipped = $this->getTypes()->flip();
 
         if (!$flipped->has(static::class)) {
-            throw new TypeMissingException(sprintf(
+            throw new UndefinedTypeException(sprintf(
                 'Looks like "%s" has not been defined in your types map in "%s".',
                 static::class,
                 self::class
