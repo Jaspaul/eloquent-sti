@@ -4,10 +4,11 @@ namespace Tests\Helpers;
 
 use Jaspaul\EloquentSTI\Inheritable;
 use Illuminate\Database\Eloquent\Model;
+use Jaspaul\EloquentSTI\HandlesTypes;
 
 class Vehicle extends Model
 {
-    use Inheritable;
+    use HandlesTypes, Inheritable;
 
     protected $typeColumn = 'custom_type_column';
 
