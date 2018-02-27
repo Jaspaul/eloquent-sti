@@ -35,7 +35,7 @@ trait Inheritable
         // This method just provides a convenient way for us to generate fresh model
         // instances of this current model. It is particularly useful during the
         // hydration of new objects via the Eloquent query builder instances.
-        $type = Arr::get($attributes, 'type');
+        $type = Arr::get($attributes, $this->getTypeColumn());
 
         if ($this->getTypes()->has($type)) {
             $class = $this->getTypes()->get($type);
@@ -63,7 +63,7 @@ trait Inheritable
      */
     public function newFromBuilder($attributes = [], $connection = null)
     {
-        $model = $this->newInstance(Arr::only((array) $attributes, ['type']), true);
+        $model = $this->newInstance(Arr::only((array) $attributes, [$this->getTypeColumn()]), true);
         $model->setRawAttributes((array) $attributes, true);
         $model->setConnection($connection ?: $this->getConnectionName());
         $model->fireModelEvent('retrieved', false);
@@ -86,5 +86,19 @@ trait Inheritable
         }
 
         return $this->table;
+    }
+
+    /**
+     * Return the column that encodes the type information.
+     *
+     * @return string
+     */
+    public function getTypeColumn(): string
+    {
+        if (! isset($this->typeColumn)) {
+            return 'type';
+        }
+
+        return $this->typeColumn;
     }
 }

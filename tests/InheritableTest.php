@@ -5,6 +5,8 @@ namespace Tests;
 use DB;
 use Tests\Helpers\User;
 use Tests\Helpers\Administrator;
+use Tests\Helpers\Vehicle;
+use Tests\Helpers\Car;
 
 class InheritableTest extends TestCase
 {
@@ -98,5 +100,19 @@ class InheritableTest extends TestCase
         $user->save();
 
         $this->assertInstanceOf(User::class, User::findOrFail($user->id));
+    }
+
+    /**
+     * @test
+     */
+    public function it_allows_the_customization_of_the_types_column()
+    {
+        $car = new Car([
+            'custom_type_column' => 'car'
+        ]);
+
+        $car->save();
+
+        $this->assertInstanceOf(Car::class, Vehicle::findOrFail($car->id));
     }
 }
