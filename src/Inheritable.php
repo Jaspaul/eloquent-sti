@@ -4,6 +4,7 @@ namespace Jaspaul\EloquentSTI;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 trait Inheritable
 {
@@ -67,5 +68,23 @@ trait Inheritable
         $model->setConnection($connection ?: $this->getConnectionName());
         $model->fireModelEvent('retrieved', false);
         return $model;
+    }
+
+    /**
+     * Get the table associated with the model.
+     *
+     * @return string
+     */
+    public function getTable()
+    {
+        if (! isset($this->table)) {
+            return str_replace(
+                '\\',
+                '',
+                Str::snake(Str::plural(class_basename(self::class)))
+            );
+        }
+
+        return $this->table;
     }
 }

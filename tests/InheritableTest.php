@@ -69,4 +69,34 @@ class InheritableTest extends TestCase
 
         $this->assertInstanceOf(Administrator::class, User::findOrFail($user->id));
     }
+
+    /**
+     * @test
+     */
+    public function it_saves_an_administrator_object_to_the_users_table_by_default()
+    {
+        $administrator = new Administrator([
+            'type' => 'administrator',
+            'name' => 'DERP'
+        ]);
+
+        $administrator->save();
+
+        $this->assertInstanceOf(Administrator::class, User::findOrFail($administrator->id));
+    }
+
+    /**
+     * @test
+     */
+    public function it_saves_a_user_object_to_the_users_table_by_default()
+    {
+        $user = new User([
+            'type' => 'user',
+            'name' => 'DERP'
+        ]);
+
+        $user->save();
+
+        $this->assertInstanceOf(User::class, User::findOrFail($user->id));
+    }
 }
