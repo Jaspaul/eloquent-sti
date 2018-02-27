@@ -7,7 +7,7 @@ use Tests\Helpers\Car;
 use Tests\Helpers\Plane;
 use Jaspaul\EloquentSTI\Exceptions\TypeMissingException;
 
-class HandlesTypesTest extends TestCase
+class StrictTypesTest extends TestCase
 {
     /**
      * @test

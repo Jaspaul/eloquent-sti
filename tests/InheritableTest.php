@@ -7,6 +7,7 @@ use Tests\Helpers\User;
 use Tests\Helpers\Administrator;
 use Tests\Helpers\Vehicle;
 use Tests\Helpers\Car;
+use Jaspaul\EloquentSTI\TypeScope;
 
 class InheritableTest extends TestCase
 {
@@ -113,6 +114,26 @@ class InheritableTest extends TestCase
 
         $car->save();
 
-        $this->assertInstanceOf(Car::class, Vehicle::findOrFail($car->id));
+        $this->assertInstanceOf(Car::class, Car::findOrFail($car->id));
+    }
+
+    /**
+     * @test
+     */
+    public function it_automatically_scopes_the_query_to_only_return_objects_matching_the_class_type()
+    {
+        $car = new Car([]);
+        $car->save();
+
+        $vehicle = new Vehicle([]);
+        $vehicle->save();
+
+        $this->assertCount(1, Car::all());
+        $this->assertInstanceOf(Car::class, Car::all()->first());
+
+        $this->assertCount(1, Vehicle::all());
+        $this->assertInstanceOf(Vehicle::class, Vehicle::all()->first());
+
+        $this->assertCount(2, Vehicle::withoutGlobalScope(TypeScope::class)->get());
     }
 }

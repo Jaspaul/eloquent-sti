@@ -4,7 +4,7 @@ namespace Jaspaul\EloquentSTI;
 
 use Jaspaul\EloquentSTI\Exceptions\TypeMissingException;
 
-trait HandlesTypes
+trait StrictTypes
 {
     /**
      * The "booting" method of the model.
@@ -15,9 +15,31 @@ trait HandlesTypes
     {
         parent::boot();
 
-        self::creating(function ($model) {
+        self::addGlobalScope(new TypeScope());
+
+        self::saving(function ($model) {
             $model->setTypeValue();
         });
+    }
+
+    /**
+     * Returns the expected type value for the object.
+     *
+     * @return string
+     */
+    public function getTypeValue(): string
+    {
+        $flipped = $this->getTypes()->flip();
+
+        if (!$flipped->has(static::class)) {
+            throw new TypeMissingException(sprintf(
+                'Looks like "%s" has not been defined in your types map in "%s".',
+                static::class,
+                self::class
+            ));
+        }
+
+        return $flipped->get(static::class);
     }
 
     /**
@@ -27,16 +49,6 @@ trait HandlesTypes
      */
     private function setTypeValue(): void
     {
-        $flipped = $this->getTypes()->flip();
-
-        if (! $flipped->has(static::class)) {
-            throw new TypeMissingException(sprintf(
-                'Looks like "%s" has not been defined in your types map in "%s".',
-                static::class,
-                self::class
-            ));
-        }
-
-        $this->{$this->getTypeColumn()} = $flipped->get(static::class);
+        $this->{$this->getTypeColumn()} = $this->getTypeValue();
     }
 }
