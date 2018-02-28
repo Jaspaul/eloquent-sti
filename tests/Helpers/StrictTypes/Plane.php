@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Helpers;
+namespace Tests\Helpers\StrictTypes;
 
 class Plane extends Vehicle
 {

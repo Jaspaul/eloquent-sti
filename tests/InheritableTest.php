@@ -3,137 +3,156 @@
 namespace Tests;
 
 use DB;
-use Tests\Helpers\User;
-use Tests\Helpers\Administrator;
-use Tests\Helpers\Vehicle;
-use Tests\Helpers\Car;
 use Jaspaul\EloquentSTI\TypeScope;
+use Tests\Helpers\StrictTypes\Car;
+use Tests\Helpers\Inheritable\User;
+use Tests\Helpers\StrictTypes\Plane;
+use Tests\Helpers\StrictTypes\Vehicle;
+use Tests\Helpers\Inheritable\Administrator;
+use Jaspaul\EloquentSTI\Exceptions\UndefinedTypeException;
 
 class InheritableTest extends TestCase
 {
     /**
      * @test
      */
-    public function it_resolves_user_objects_when_the_type_is_user()
+    public function inheritable_objects_are_automatically_resolved_into_their_respective_objects()
     {
         DB::table('users')->insert([
-            'type' => 'user',
-            'name' => 'Derp'
+            ['type' => 'user', 'name' => 'Daffy Duck'],
+            ['type' => 'administrator', 'name' => 'Donald Duck']
         ]);
 
-        $users = User::all();
+        $daffy = User::where('name', 'Daffy Duck')->firstOrFail();
+        $donald = User::where('name', 'Donald Duck')->firstOrFail();
 
-        $this->assertCount(1, $users);
-        $this->assertInstanceOf(User::class, $users->first());
+        $this->assertInstanceOf(User::class, $daffy);
+        $this->assertInstanceOf(Administrator::class, $donald);
     }
 
     /**
      * @test
      */
-    public function it_resolves_administrator_objects_when_the_type_is_administrator()
+    public function inheritable_objects_are_automatically_resolved_to_the_querying_class_if_the_type_is_not_defined_in_the_types_array()
     {
         DB::table('users')->insert([
-            'type' => 'administrator',
-            'name' => 'Derp'
+            ['type' => str_random(40), 'name' => 'Daffy Duck']
         ]);
-        $users = User::all();
 
-        $this->assertCount(1, $users);
-        $this->assertInstanceOf(Administrator::class, $users->first());
+        $daffy = User::where('name', 'Daffy Duck')->firstOrFail();
+        $this->assertInstanceOf(User::class, $daffy);
+
+        $daffy = Administrator::where('name', 'Daffy Duck')->firstOrFail();
+        $this->assertInstanceOf(Administrator::class, $daffy);
     }
 
     /**
      * @test
      */
-    public function it_resolves_user_objects_when_the_type_is_unknown()
+    public function strictly_typed_inheritable_objects_are_only_accessible_through_their_respective_classes()
     {
-        DB::table('users')->insert([
-            'type' => str_random(40),
-            'name' => 'Derp'
+        DB::table('vehicles')->insert([
+            ['custom_type_column' => 'vehicle', 'name' => 'Bicycle'],
+            ['custom_type_column' => 'car', 'name' => 'Ford F-150']
         ]);
 
-        $users = User::all();
+        $vehicles = Vehicle::all();
+        $cars = Car::all();
 
-        $this->assertCount(1, $users);
-        $this->assertInstanceOf(User::class, $users->first());
+        $this->assertCount(1, $vehicles);
+        $this->assertInstanceOf(Vehicle::class, $vehicles->first());
+
+        $this->assertCount(1, $cars);
+        $this->assertInstanceOf(Car::class, $cars->first());
+
+        $this->assertEmpty(Vehicle::find($cars->first()->id));
+        $this->assertEmpty(Car::find($vehicles->first()->id));
     }
 
     /**
      * @test
      */
-    public function it_resolves_administrator_objects_when_a_user_is_saved_with_an_administrator_type()
+    public function inheritable_objects_can_have_their_types_customized_and_changed_at_run_time()
     {
-        $user = new User([
-            'type' => 'administrator',
-            'name' => 'HERP'
-        ]);
+        $user = new User(['type' => 'user', 'name' => 'Daffy Duck']);
+        $administrator = new User(['type' => 'administrator', 'name' => 'Donald Duck']);
 
         $user->save();
-
-        $this->assertInstanceOf(Administrator::class, User::findOrFail($user->id));
-    }
-
-    /**
-     * @test
-     */
-    public function it_saves_an_administrator_object_to_the_users_table_by_default()
-    {
-        $administrator = new Administrator([
-            'type' => 'administrator',
-            'name' => 'DERP'
-        ]);
-
         $administrator->save();
 
-        $this->assertInstanceOf(Administrator::class, User::findOrFail($administrator->id));
+        $daffy = User::where('name', 'Daffy Duck')->firstOrFail();
+        $donald = User::where('name', 'Donald Duck')->firstOrFail();
+
+        $this->assertInstanceOf(User::class, $daffy);
+        $this->assertInstanceOf(Administrator::class, $donald);
+
+        $daffy->type = 'administrator';
+        $daffy->save();
+
+        $this->assertInstanceOf(Administrator::class, $daffy->fresh());
+
+        $donald->type = 'user';
+        $donald->save();
+
+        $this->assertInstanceOf(User::class, $daffy->fresh());
     }
 
     /**
      * @test
      */
-    public function it_saves_a_user_object_to_the_users_table_by_default()
+    public function strictly_typed_inheritable_objects_will_automatically_set_their_types_before_saving_and_cannot_be_changed_or_customized()
     {
-        $user = new User([
-            'type' => 'user',
-            'name' => 'DERP'
-        ]);
+        $vehicle = new Vehicle(['name' => 'Bicycle']);
+        $car = new Car(['name' => 'Ford F-150']);
 
-        $user->save();
-
-        $this->assertInstanceOf(User::class, User::findOrFail($user->id));
-    }
-
-    /**
-     * @test
-     */
-    public function it_allows_the_customization_of_the_types_column()
-    {
-        $car = new Car([
-            'custom_type_column' => 'car'
-        ]);
-
-        $car->save();
-
-        $this->assertInstanceOf(Car::class, Car::findOrFail($car->id));
-    }
-
-    /**
-     * @test
-     */
-    public function it_automatically_scopes_the_query_to_only_return_objects_matching_the_class_type()
-    {
-        $car = new Car([]);
-        $car->save();
-
-        $vehicle = new Vehicle([]);
         $vehicle->save();
+        $car->save();
 
-        $this->assertCount(1, Car::all());
-        $this->assertInstanceOf(Car::class, Car::all()->first());
+        $bicycle = Vehicle::findOrFail($vehicle->id);
+        $ford = Car::findOrFail($car->id);
 
-        $this->assertCount(1, Vehicle::all());
-        $this->assertInstanceOf(Vehicle::class, Vehicle::all()->first());
+        $this->assertInstanceOf(Vehicle::class, $bicycle);
+        $this->assertInstanceOf(Car::class, $ford);
 
-        $this->assertCount(2, Vehicle::withoutGlobalScope(TypeScope::class)->get());
+        $bicycle->custom_type_column = 'car';
+        $bicycle->save();
+
+        $this->assertInstanceOf(Vehicle::class, $bicycle->fresh());
+
+        $car->custom_type_column = 'vehicle';
+        $car->save();
+
+        $this->assertInstanceOf(Car::class, $car->fresh());
+    }
+
+    /**
+     * @test
+     */
+    public function inheritable_objects_allow_the_customization_of_the_type_column()
+    {
+        DB::table('vehicles')->insert([
+            ['custom_type_column' => 'car', 'name' => 'Ford F-150']
+        ]);
+
+        $cars = Car::all();
+
+        $this->assertCount(1, $cars);
+        $this->assertInstanceOf(Car::class, $cars->first());
+        $this->assertSame('Ford F-150', $cars->first()->name);
+        $this->assertSame('car', $cars->first()->getTypeValue());
+        $this->assertSame('custom_type_column', $cars->first()->getTypeColumn());
+    }
+
+    /**
+     * @test
+     */
+    public function strictly_typed_inheritable_objects_throw_an_exception_before_saving_if_the_class_is_not_defined_in_the_types_array()
+    {
+        $this->expectException(UndefinedTypeException::class);
+
+        $plane = new Plane(['name' => '747']);
+        $plane->save();
+
+        $this->assertEmpty(DB::table('vehicles')->get());
     }
 }

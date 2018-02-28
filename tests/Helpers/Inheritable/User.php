@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Helpers;
+namespace Tests\Helpers\Inheritable;
 
 use Jaspaul\EloquentSTI\Inheritable;
 use Illuminate\Database\Eloquent\Model;
