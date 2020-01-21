@@ -9,18 +9,9 @@ use Orchestra\Database\ConsoleServiceProvider;
 abstract class TestCase extends Base
 {
     /**
-     * @before
-     */
-    protected function setUpMockery()
-    {
-        Mockery::getConfiguration()->allowMockingNonExistentMethods(false);
-        Mockery::getConfiguration()->allowMockingMethodsUnnecessarily(false);
-    }
-
-    /**
      * Setup the test environment.
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
