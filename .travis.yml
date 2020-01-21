@@ -1,19 +1,9 @@
 language: php
 
-matrix:
-  include:
-    - php: 7.1
-      env: ILLUMINATE_VERSION=5.5.*
-    - php: 7.1
-      env: ILLUMINATE_VERSION=5.6.*
-    - php: 7.2
-      env: ILLUMINATE_VERSION=5.5.*
-    - php: 7.2
-      env: ILLUMINATE_VERSION=5.6.*
-
-before_install:
-  - composer require "illuminate/database:${ILLUMINATE_VERSION}" --no-update
-  - composer require "illuminate/support:${ILLUMINATE_VERSION}" --no-update
+php:
+  - 7.2
+  - 7.3
+  - 7.4
 
 before_script: composer install
 

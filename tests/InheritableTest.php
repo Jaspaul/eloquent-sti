@@ -3,6 +3,7 @@
 namespace Tests;
 
 use DB;
+use Illuminate\Support\Str;
 use Jaspaul\EloquentSTI\TypeScope;
 use Tests\Helpers\StrictTypes\Car;
 use Tests\Helpers\Inheritable\User;
@@ -36,7 +37,7 @@ class InheritableTest extends TestCase
     public function inheritable_objects_are_automatically_resolved_to_the_querying_class_if_the_type_is_not_defined_in_the_types_array()
     {
         DB::table('users')->insert([
-            ['type' => str_random(40), 'name' => 'Daffy Duck']
+            ['type' => Str::random(40), 'name' => 'Daffy Duck']
         ]);
 
         $daffy = User::where('name', 'Daffy Duck')->firstOrFail();
